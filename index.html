@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bitácora</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1B3A2B;
+    --paper:#EFE7D4;
+    --paper-line:#D9CDA9;
+    --rust:#C1622D;
+    --gold:#B98B2A;
+    --charcoal:#2B2620;
+    --tab-gastos:#C1622D;
+    --tab-tareas:#1B3A2B;
+    --tab-estudio:#3C5A7A;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    font-family:'Inter',sans-serif;
+    color:var(--charcoal);
+    min-height:100vh;
+    background-image:
+      repeating-linear-gradient(var(--paper) 0px, var(--paper) 27px, var(--paper-line) 28px);
+  }
+  header{
+    padding:28px 20px 12px 20px;
+    text-align:left;
+  }
+  header h1{
+    font-family:'Fraunces',serif;
+    font-weight:700;
+    font-size:2rem;
+    margin:0;
+    color:var(--ink);
+    letter-spacing:-0.02em;
+  }
+  header p{
+    margin:4px 0 0 0;
+    font-size:0.85rem;
+    color:#5b5448;
+    font-style:italic;
+  }
+  .tabs{
+    display:flex;
+    gap:6px;
+    padding:0 16px;
+    margin-top:18px;
+  }
+  .tab{
+    flex:1;
+    border:none;
+    padding:12px 6px 10px 6px;
+    border-radius:10px 10px 0 0;
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:0.92rem;
+    cursor:pointer;
+    color:#fff;
+    opacity:0.55;
+    transition:opacity .2s ease, transform .15s ease;
+  }
+  .tab.active{opacity:1; transform:translateY(-2px);}
+  .tab[data-tab="gastos"]{background:var(--tab-gastos);}
+  .tab[data-tab="tareas"]{background:var(--tab-tareas);}
+  .tab[data-tab="estudio"]{background:var(--tab-estudio);}
+
+  main{
+    margin:0 16px 40px 16px;
+    background:#FAF7EE;
+    border-radius:0 12px 12px 12px;
+    padding:20px 18px 28px 18px;
+    box-shadow:0 1px 0 rgba(0,0,0,0.05), 0 8px 20px -10px rgba(0,0,0,0.25);
+    min-height:60vh;
+  }
+  .panel{display:none;}
+  .panel.active{display:block; animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);}}
+
+  h2.section-title{
+    font-family:'Fraunces',serif;
+    font-size:1.2rem;
+    margin:0 0 14px 0;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .dot{width:9px;height:9px;border-radius:50%;display:inline-block;}
+  .dot.gastos{background:var(--tab-gastos);}
+  .dot.tareas{background:var(--tab-tareas);}
+  .dot.estudio{background:var(--tab-estudio);}
+
+  .row{display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap;}
+  input, select{
+    font-family:'Inter',sans-serif;
+    font-size:0.9rem;
+    padding:9px 10px;
+    border:1px solid var(--paper-line);
+    border-radius:8px;
+    background:#fff;
+    color:var(--charcoal);
+  }
+  input[type="text"], input[type="number"]{flex:1; min-width:90px;}
+  button.add{
+    border:none;
+    background:var(--ink);
+    color:#fff;
+    padding:9px 16px;
+    border-radius:8px;
+    font-weight:600;
+    font-size:0.85rem;
+    cursor:pointer;
+  }
+  .tab[data-tab="gastos"] ~ * button.add{}
+  #panel-gastos button.add{background:var(--tab-gastos);}
+  #panel-estudio button.add{background:var(--tab-estudio);}
+
+  .summary{
+    font-family:'JetBrains Mono', monospace;
+    background:var(--charcoal);
+    color:var(--paper);
+    border-radius:10px;
+    padding:14px 16px;
+    margin-bottom:16px;
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+  }
+  .summary .num{font-size:1.4rem; font-weight:500;}
+  .summary .label{font-size:0.7rem; opacity:0.7; text-transform:uppercase; letter-spacing:0.06em;}
+
+  ul.list{list-style:none; padding:0; margin:0;}
+  ul.list li{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px 0;
+    border-bottom:1px dashed var(--paper-line);
+  }
+  ul.list li:last-child{border-bottom:none;}
+  .item-text{flex:1; font-size:0.92rem;}
+  .item-text.done{text-decoration:line-through; opacity:0.45;}
+  .item-meta{font-family:'JetBrains Mono', monospace; font-size:0.78rem; color:#6b6256;}
+  .del{
+    background:none; border:none; color:#a85c3f; font-size:1.1rem; cursor:pointer; line-height:1; padding:2px 6px;
+  }
+  .check{
+    width:18px;height:18px; border-radius:5px; border:2px solid var(--paper-line);
+    cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+    background:#fff; font-size:0.7rem; color:#fff;
+  }
+  .check.checked{background:var(--ink); border-color:var(--ink);}
+  .empty{
+    text-align:center; padding:30px 10px; color:#8a8170; font-style:italic; font-size:0.88rem;
+  }
+
+  .habits{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px;}
+  .habit-chip{
+    border:1px solid var(--paper-line);
+    border-radius:20px;
+    padding:7px 14px;
+    font-size:0.82rem;
+    cursor:pointer;
+    background:#fff;
+    user-select:none;
+  }
+  .habit-chip.checked{background:var(--ink); color:#fff; border-color:var(--ink);}
+  .habit-chip .x{margin-left:6px; opacity:0.5;}
+
+  .cat-pill{
+    font-size:0.7rem;
+    padding:3px 8px;
+    border-radius:20px;
+    background:#f0e6d2;
+    color:#7a5a2a;
+    font-family:'JetBrains Mono', monospace;
+  }
+  footer{
+    text-align:center;
+    font-size:0.72rem;
+    color:#9a9080;
+    padding:0 0 24px 0;
+  }
+  .loading{text-align:center; padding:20px; color:#9a9080; font-size:0.85rem;}
+
+  /* LUNA */
+  .luna-fab{
+    position:fixed;
+    bottom:22px;
+    right:18px;
+    width:60px;
+    height:60px;
+    border-radius:50%;
+    border:none;
+    background:linear-gradient(145deg, #3C5A7A, #1B3A2B);
+    color:#fff;
+    font-size:1.5rem;
+    box-shadow:0 8px 22px -6px rgba(0,0,0,0.45);
+    cursor:pointer;
+    z-index:50;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:transform .15s ease;
+  }
+  .luna-fab:active{transform:scale(0.93);}
+  .luna-fab.listening{
+    background:linear-gradient(145deg, #C1622D, #B98B2A);
+    animation:pulse 1.1s infinite;
+  }
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(193,98,45,0.45);}
+    70%{box-shadow:0 0 0 16px rgba(193,98,45,0);}
+    100%{box-shadow:0 0 0 0 rgba(193,98,45,0);}
+  }
+
+  .luna-overlay{
+    position:fixed; inset:0; background:rgba(27,24,18,0.55);
+    z-index:60; display:none; align-items:flex-end; justify-content:center;
+  }
+  .luna-overlay.open{display:flex;}
+  .luna-sheet{
+    width:100%; max-width:480px;
+    background:#FAF7EE;
+    border-radius:18px 18px 0 0;
+    padding:22px 20px 28px 20px;
+    box-shadow:0 -8px 30px rgba(0,0,0,0.3);
+    animation:slideup .25s ease;
+  }
+  @keyframes slideup{from{transform:translateY(30px); opacity:0;} to{transform:translateY(0); opacity:1;}}
+  .luna-sheet h3{
+    font-family:'Fraunces',serif; margin:0 0 4px 0; color:var(--ink); font-size:1.25rem;
+    display:flex; align-items:center; gap:8px;
+  }
+  .luna-sheet .hint{font-size:0.8rem; color:#8a8170; margin:0 0 16px 0;}
+  .luna-status{
+    min-height:46px;
+    background:#fff;
+    border:1px solid var(--paper-line);
+    border-radius:10px;
+    padding:12px 14px;
+    font-size:0.92rem;
+    margin-bottom:14px;
+    color:var(--charcoal);
+  }
+  .luna-status.confirm{background:#eef3e9; border-color:#9fbf8a; color:#2c4a22;}
+  .luna-row{display:flex; gap:8px;}
+  .luna-mic{
+    width:48px; height:48px; border-radius:50%; border:none;
+    background:var(--ink); color:#fff; font-size:1.2rem; cursor:pointer; flex-shrink:0;
+  }
+  .luna-mic.listening{background:var(--rust); animation:pulse 1.1s infinite;}
+  .luna-input{flex:1;}
+  .luna-send{background:var(--rust); border:none; color:#fff; border-radius:8px; padding:0 16px; font-weight:600; cursor:pointer;}
+  .luna-examples{margin-top:14px; font-size:0.76rem; color:#9a9080; line-height:1.5;}
+  .luna-close{
+    position:absolute; top:14px; right:18px; background:none; border:none; font-size:1.3rem; color:#9a9080; cursor:pointer;
+  }
+  .luna-sheet{position:relative;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Bitácora</h1>
+  <p>tu cuaderno de cada día, con Luna 🌙</p>
+</header>
+
+<div class="tabs">
+  <button class="tab active" data-tab="gastos">Gastos</button>
+  <button class="tab" data-tab="tareas">Tareas &amp; hábitos</button>
+  <button class="tab" data-tab="estudio">Estudio / trabajo</button>
+</div>
+
+<main>
+
+  <!-- GASTOS -->
+  <section class="panel active" id="panel-gastos">
+    <h2 class="section-title"><span class="dot gastos"></span>Gastos del mes</h2>
+    <div class="summary">
+      <div>
+        <div class="label">Total gastado</div>
+        <div class="num" id="gastos-total">$0</div>
+      </div>
+      <div>
+        <div class="label" style="text-align:right">Movimientos</div>
+        <div class="num" id="gastos-count" style="text-align:right">0</div>
+      </div>
+    </div>
+    <div class="row">
+      <input type="text" id="gasto-desc" placeholder="¿En qué gastaste?">
+      <input type="number" id="gasto-monto" placeholder="Monto" min="0">
+    </div>
+    <div class="row">
+      <select id="gasto-cat" style="flex:1">
+        <option value="Comida">Comida</option>
+        <option value="Transporte">Transporte</option>
+        <option value="Hogar">Hogar</option>
+        <option value="Ocio">Ocio</option>
+        <option value="Salud">Salud</option>
+        <option value="Otro">Otro</option>
+      </select>
+      <button class="add" onclick="addGasto()">Agregar</button>
+    </div>
+    <ul class="list" id="gastos-list"></ul>
+  </section>
+
+  <!-- TAREAS -->
+  <section class="panel" id="panel-tareas">
+    <h2 class="section-title"><span class="dot tareas"></span>Hábitos de hoy</h2>
+    <div class="habits" id="habits-list"></div>
+    <div class="row">
+      <input type="text" id="habit-input" placeholder="Nuevo hábito (ej: Tomar agua)">
+      <button class="add" onclick="addHabit()" style="background:var(--ink)">Agregar</button>
+    </div>
+
+    <h2 class="section-title" style="margin-top:26px"><span class="dot tareas"></span>Tareas pendientes</h2>
+    <div class="row">
+      <input type="text" id="tarea-input" placeholder="¿Qué necesitas hacer?">
+      <button class="add" onclick="addTarea()" style="background:var(--ink)">Agregar</button>
+    </div>
+    <ul class="list" id="tareas-list"></ul>
+  </section>
+
+  <!-- ESTUDIO -->
+  <section class="panel" id="panel-estudio">
+    <h2 class="section-title"><span class="dot estudio"></span>Estudio / trabajo</h2>
+    <div class="row">
+      <input type="text" id="estudio-input" placeholder="Proyecto, lectura, entrega...">
+      <input type="text" id="estudio-fecha" placeholder="Fecha límite (opcional)" style="max-width:160px">
+    </div>
+    <div class="row">
+      <button class="add" onclick="addEstudio()">Agregar</button>
+    </div>
+    <ul class="list" id="estudio-list"></ul>
+  </section>
+
+</main>
+
+<footer>tus datos se guardan automáticamente en este dispositivo</footer>
+
+<button class="luna-fab" id="luna-fab" onclick="openLuna()">🎙️</button>
+
+<div class="luna-overlay" id="luna-overlay">
+  <div class="luna-sheet">
+    <button class="luna-close" onclick="closeLuna()">×</button>
+    <h3>🌙 Luna</h3>
+    <p class="hint">Dime qué agregar, por ejemplo: <em>"agrega gasto de 20 mil en comida hoy"</em></p>
+    <div class="luna-status" id="luna-status">Toca el micrófono o escribe abajo.</div>
+    <div class="luna-row">
+      <button class="luna-mic" id="luna-mic" onclick="toggleListen()">🎙️</button>
+      <input type="text" class="luna-input" id="luna-input" placeholder="Escríbele a Luna...">
+      <button class="luna-send" onclick="handleLunaText()">Enviar</button>
+    </div>
+    <div class="luna-examples">
+      Ejemplos: "agrega gasto de 15000 en transporte" · "agrega tarea llamar al banco" ·
+      "agrega hábito tomar agua" · "agrega estudio entregar informe para el viernes"
+    </div>
+  </div>
+</div>
+
+<script>
+let state = { gastos: [], tareas: [], habitos: [], estudio: [] };
+let ready = false;
+
+async function load(){
+  try{
+    const r = await window.storage.get('bitacora-state', false);
+    if(r && r.value) state = JSON.parse(r.value);
+  }catch(e){ /* no previous data */ }
+  ready = true;
+  renderAll();
+}
+
+async function save(){
+  if(!ready) return;
+  try{
+    await window.storage.set('bitacora-state', JSON.stringify(state), false);
+  }catch(e){ console.error('No se pudo guardar', e); }
+}
+
+// TABS
+document.querySelectorAll('.tab').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
+  });
+});
+
+function fmt(n){
+  return '$' + Number(n).toLocaleString('es-CO');
+}
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+
+// GASTOS
+function addGasto(){
+  const desc = document.getElementById('gasto-desc').value.trim();
+  const monto = parseFloat(document.getElementById('gasto-monto').value);
+  const cat = document.getElementById('gasto-cat').value;
+  if(!desc || !monto || monto<=0) return;
+  state.gastos.unshift({id:uid(), desc, monto, cat, date:new Date().toISOString()});
+  document.getElementById('gasto-desc').value='';
+  document.getElementById('gasto-monto').value='';
+  save(); renderGastos();
+}
+function delGasto(id){
+  state.gastos = state.gastos.filter(g=>g.id!==id);
+  save(); renderGastos();
+}
+function renderGastos(){
+  const total = state.gastos.reduce((s,g)=>s+Number(g.monto),0);
+  document.getElementById('gastos-total').textContent = fmt(total);
+  document.getElementById('gastos-count').textContent = state.gastos.length;
+  const list = document.getElementById('gastos-list');
+  if(state.gastos.length===0){
+    list.innerHTML = '<div class="empty">Aún no registras gastos. ¡Agrega el primero!</div>';
+    return;
+  }
+  list.innerHTML = state.gastos.map(g=>`
+    <li>
+      <span class="cat-pill">${g.cat}</span>
+      <span class="item-text">${g.desc}</span>
+      <span class="item-meta">${fmt(g.monto)}</span>
+      <button class="del" onclick="delGasto('${g.id}')">×</button>
+    </li>`).join('');
+}
+
+// HABITOS
+function addHabit(){
+  const input = document.getElementById('habit-input');
+  const name = input.value.trim();
+  if(!name) return;
+  state.habitos.push({id:uid(), name, checked:false});
+  input.value='';
+  save(); renderHabits();
+}
+function toggleHabit(id){
+  const h = state.habitos.find(x=>x.id===id);
+  if(h) h.checked = !h.checked;
+  save(); renderHabits();
+}
+function delHabit(id){
+  state.habitos = state.habitos.filter(h=>h.id!==id);
+  save(); renderHabits();
+}
+function renderHabits(){
+  const wrap = document.getElementById('habits-list');
+  if(state.habitos.length===0){
+    wrap.innerHTML = '<div class="empty" style="width:100%">Agrega un hábito que quieras seguir cada día.</div>';
+    return;
+  }
+  wrap.innerHTML = state.habitos.map(h=>`
+    <div class="habit-chip ${h.checked?'checked':''}" onclick="toggleHabit('${h.id}')">
+      ${h.name}<span class="x" onclick="event.stopPropagation(); delHabit('${h.id}')">×</span>
+    </div>`).join('');
+}
+
+// TAREAS
+function addTarea(){
+  const input = document.getElementById('tarea-input');
+  const text = input.value.trim();
+  if(!text) return;
+  state.tareas.unshift({id:uid(), text, done:false});
+  input.value='';
+  save(); renderTareas();
+}
+function toggleTarea(id){
+  const t = state.tareas.find(x=>x.id===id);
+  if(t) t.done = !t.done;
+  save(); renderTareas();
+}
+function delTarea(id){
+  state.tareas = state.tareas.filter(t=>t.id!==id);
+  save(); renderTareas();
+}
+function renderTareas(){
+  const list = document.getElementById('tareas-list');
+  if(state.tareas.length===0){
+    list.innerHTML = '<div class="empty">No tienes tareas pendientes. Buen trabajo.</div>';
+    return;
+  }
+  list.innerHTML = state.tareas.map(t=>`
+    <li>
+      <span class="check ${t.done?'checked':''}" onclick="toggleTarea('${t.id}')">${t.done?'✓':''}</span>
+      <span class="item-text ${t.done?'done':''}">${t.text}</span>
+      <button class="del" onclick="delTarea('${t.id}')">×</button>
+    </li>`).join('');
+}
+
+// ESTUDIO
+function addEstudio(){
+  const input = document.getElementById('estudio-input');
+  const fecha = document.getElementById('estudio-fecha');
+  const text = input.value.trim();
+  if(!text) return;
+  state.estudio.unshift({id:uid(), text, fecha: fecha.value.trim(), done:false});
+  input.value=''; fecha.value='';
+  save(); renderEstudio();
+}
+function toggleEstudio(id){
+  const e = state.estudio.find(x=>x.id===id);
+  if(e) e.done = !e.done;
+  save(); renderEstudio();
+}
+function delEstudio(id){
+  state.estudio = state.estudio.filter(e=>e.id!==id);
+  save(); renderEstudio();
+}
+function renderEstudio(){
+  const list = document.getElementById('estudio-list');
+  if(state.estudio.length===0){
+    list.innerHTML = '<div class="empty">Sin pendientes de estudio o trabajo por ahora.</div>';
+    return;
+  }
+  list.innerHTML = state.estudio.map(e=>`
+    <li>
+      <span class="check ${e.done?'checked':''}" onclick="toggleEstudio('${e.id}')">${e.done?'✓':''}</span>
+      <span class="item-text ${e.done?'done':''}">${e.text}</span>
+      ${e.fecha?`<span class="item-meta">${e.fecha}</span>`:''}
+      <button class="del" onclick="delEstudio('${e.id}')">×</button>
+    </li>`).join('');
+}
+
+function renderAll(){
+  renderGastos(); renderHabits(); renderTareas(); renderEstudio();
+}
+
+load();
+
+/* ============ LUNA: asistente de voz ============ */
+const CATS = {
+  Comida: ['comida','comer','almuerzo','desayuno','cena','restaurante','mercado','super','supermercado','domicilio'],
+  Transporte: ['transporte','uber','taxi','bus','gasolina','parqueadero','metro','pasaje','didi'],
+  Hogar: ['arriendo','hogar','casa','servicios','luz','agua','internet','aseo'],
+  Ocio: ['cine','salida','fiesta','ocio','bar','rumba','juego','streaming','netflix'],
+  Salud: ['salud','médico','medico','farmacia','medicina','droguería','drogueria','consulta']
+};
+
+function openLuna(){
+  document.getElementById('luna-overlay').classList.add('open');
+  setLunaStatus('Toca el micrófono o escribe abajo.', false);
+}
+function closeLuna(){
+  document.getElementById('luna-overlay').classList.remove('open');
+  stopListen();
+}
+function setLunaStatus(msg, confirm){
+  const el = document.getElementById('luna-status');
+  el.textContent = msg;
+  el.classList.toggle('confirm', !!confirm);
+}
+
+let recognition = null;
+let listening = false;
+
+function getRecognition(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR) return null;
+  const r = new SR();
+  r.lang = 'es-CO';
+  r.interimResults = false;
+  r.maxAlternatives = 1;
+  return r;
+}
+
+function toggleListen(){
+  if(listening){ stopListen(); return; }
+  recognition = getRecognition();
+  if(!recognition){
+    setLunaStatus('Tu navegador no soporta micrófono aquí. Escríbele a Luna abajo. 👇', false);
+    return;
+  }
+  listening = true;
+  document.getElementById('luna-mic').classList.add('listening');
+  document.getElementById('luna-fab').classList.add('listening');
+  setLunaStatus('Escuchando... habla ahora.', false);
+
+  recognition.onresult = (e)=>{
+    const text = e.results[0][0].transcript;
+    document.getElementById('luna-input').value = text;
+    processLunaCommand(text);
+  };
+  recognition.onerror = ()=>{
+    setLunaStatus('No te escuché bien. Intenta de nuevo o escribe.', false);
+  };
+  recognition.onend = ()=>{ stopListen(); };
+  recognition.start();
+}
+function stopListen(){
+  listening = false;
+  document.getElementById('luna-mic').classList.remove('listening');
+  document.getElementById('luna-fab').classList.remove('listening');
+  if(recognition){ try{ recognition.stop(); }catch(e){} }
+}
+function handleLunaText(){
+  const input = document.getElementById('luna-input');
+  const text = input.value.trim();
+  if(!text) return;
+  processLunaCommand(text);
+}
+
+function parseAmount(text){
+  // ej: "20 mil", "20mil", "20k",
