@@ -3,608 +3,423 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bitácora</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>Invitación · Mis 15</title>
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Anton&family=Caveat:wght@600;700&family=Oswald:wght@300;400;500;600&display=swap');
+
   :root{
-    --ink:#1B3A2B;
-    --paper:#EFE7D4;
-    --paper-line:#D9CDA9;
-    --rust:#C1622D;
-    --gold:#B98B2A;
-    --charcoal:#2B2620;
-    --tab-gastos:#C1622D;
-    --tab-tareas:#1B3A2B;
-    --tab-estudio:#3C5A7A;
+    --ink:#111111;
+    --paper:#f1f0ec;
+    --paper-shadow:#d8d6cf;
+    --wax:#1a1a1a;
+    --gold:#bda36b;
   }
+
   *{box-sizing:border-box;}
-  body{
-    margin:0;
-    background:var(--paper);
-    font-family:'Inter',sans-serif;
-    color:var(--charcoal);
+  html,body{
+    margin:0;padding:0;height:100%;
+    background:#0c0c0c;
+    font-family:'Oswald',sans-serif;
+    overflow-x:hidden;
+  }
+
+  /* ---------- STAGE (sobre) ---------- */
+  #stage{
     min-height:100vh;
-    background-image:
-      repeating-linear-gradient(var(--paper) 0px, var(--paper) 27px, var(--paper-line) 28px);
-  }
-  header{
-    padding:28px 20px 12px 20px;
-    text-align:left;
-  }
-  header h1{
-    font-family:'Fraunces',serif;
-    font-weight:700;
-    font-size:2rem;
-    margin:0;
-    color:var(--ink);
-    letter-spacing:-0.02em;
-  }
-  header p{
-    margin:4px 0 0 0;
-    font-size:0.85rem;
-    color:#5b5448;
-    font-style:italic;
-  }
-  .tabs{
-    display:flex;
-    gap:6px;
-    padding:0 16px;
-    margin-top:18px;
-  }
-  .tab{
-    flex:1;
-    border:none;
-    padding:12px 6px 10px 6px;
-    border-radius:10px 10px 0 0;
-    font-family:'Fraunces',serif;
-    font-weight:600;
-    font-size:0.92rem;
-    cursor:pointer;
-    color:#fff;
-    opacity:0.55;
-    transition:opacity .2s ease, transform .15s ease;
-  }
-  .tab.active{opacity:1; transform:translateY(-2px);}
-  .tab[data-tab="gastos"]{background:var(--tab-gastos);}
-  .tab[data-tab="tareas"]{background:var(--tab-tareas);}
-  .tab[data-tab="estudio"]{background:var(--tab-estudio);}
-
-  main{
-    margin:0 16px 40px 16px;
-    background:#FAF7EE;
-    border-radius:0 12px 12px 12px;
-    padding:20px 18px 28px 18px;
-    box-shadow:0 1px 0 rgba(0,0,0,0.05), 0 8px 20px -10px rgba(0,0,0,0.25);
-    min-height:60vh;
-  }
-  .panel{display:none;}
-  .panel.active{display:block; animation:fade .25s ease;}
-  @keyframes fade{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);}}
-
-  h2.section-title{
-    font-family:'Fraunces',serif;
-    font-size:1.2rem;
-    margin:0 0 14px 0;
-    display:flex;
-    align-items:center;
-    gap:8px;
-  }
-  .dot{width:9px;height:9px;border-radius:50%;display:inline-block;}
-  .dot.gastos{background:var(--tab-gastos);}
-  .dot.tareas{background:var(--tab-tareas);}
-  .dot.estudio{background:var(--tab-estudio);}
-
-  .row{display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap;}
-  input, select{
-    font-family:'Inter',sans-serif;
-    font-size:0.9rem;
-    padding:9px 10px;
-    border:1px solid var(--paper-line);
-    border-radius:8px;
-    background:#fff;
-    color:var(--charcoal);
-  }
-  input[type="text"], input[type="number"]{flex:1; min-width:90px;}
-  button.add{
-    border:none;
-    background:var(--ink);
-    color:#fff;
-    padding:9px 16px;
-    border-radius:8px;
-    font-weight:600;
-    font-size:0.85rem;
-    cursor:pointer;
-  }
-  .tab[data-tab="gastos"] ~ * button.add{}
-  #panel-gastos button.add{background:var(--tab-gastos);}
-  #panel-estudio button.add{background:var(--tab-estudio);}
-
-  .summary{
-    font-family:'JetBrains Mono', monospace;
-    background:var(--charcoal);
-    color:var(--paper);
-    border-radius:10px;
-    padding:14px 16px;
-    margin-bottom:16px;
-    display:flex;
-    justify-content:space-between;
-    align-items:baseline;
-  }
-  .summary .num{font-size:1.4rem; font-weight:500;}
-  .summary .label{font-size:0.7rem; opacity:0.7; text-transform:uppercase; letter-spacing:0.06em;}
-
-  ul.list{list-style:none; padding:0; margin:0;}
-  ul.list li{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    padding:10px 0;
-    border-bottom:1px dashed var(--paper-line);
-  }
-  ul.list li:last-child{border-bottom:none;}
-  .item-text{flex:1; font-size:0.92rem;}
-  .item-text.done{text-decoration:line-through; opacity:0.45;}
-  .item-meta{font-family:'JetBrains Mono', monospace; font-size:0.78rem; color:#6b6256;}
-  .del{
-    background:none; border:none; color:#a85c3f; font-size:1.1rem; cursor:pointer; line-height:1; padding:2px 6px;
-  }
-  .check{
-    width:18px;height:18px; border-radius:5px; border:2px solid var(--paper-line);
-    cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center;
-    background:#fff; font-size:0.7rem; color:#fff;
-  }
-  .check.checked{background:var(--ink); border-color:var(--ink);}
-  .empty{
-    text-align:center; padding:30px 10px; color:#8a8170; font-style:italic; font-size:0.88rem;
-  }
-
-  .habits{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px;}
-  .habit-chip{
-    border:1px solid var(--paper-line);
-    border-radius:20px;
-    padding:7px 14px;
-    font-size:0.82rem;
-    cursor:pointer;
-    background:#fff;
-    user-select:none;
-  }
-  .habit-chip.checked{background:var(--ink); color:#fff; border-color:var(--ink);}
-  .habit-chip .x{margin-left:6px; opacity:0.5;}
-
-  .cat-pill{
-    font-size:0.7rem;
-    padding:3px 8px;
-    border-radius:20px;
-    background:#f0e6d2;
-    color:#7a5a2a;
-    font-family:'JetBrains Mono', monospace;
-  }
-  footer{
-    text-align:center;
-    font-size:0.72rem;
-    color:#9a9080;
-    padding:0 0 24px 0;
-  }
-  .loading{text-align:center; padding:20px; color:#9a9080; font-size:0.85rem;}
-
-  /* LUNA */
-  .luna-fab{
-    position:fixed;
-    bottom:22px;
-    right:18px;
-    width:60px;
-    height:60px;
-    border-radius:50%;
-    border:none;
-    background:linear-gradient(145deg, #3C5A7A, #1B3A2B);
-    color:#fff;
-    font-size:1.5rem;
-    box-shadow:0 8px 22px -6px rgba(0,0,0,0.45);
-    cursor:pointer;
-    z-index:50;
     display:flex;
     align-items:center;
     justify-content:center;
-    transition:transform .15s ease;
-  }
-  .luna-fab:active{transform:scale(0.93);}
-  .luna-fab.listening{
-    background:linear-gradient(145deg, #C1622D, #B98B2A);
-    animation:pulse 1.1s infinite;
-  }
-  @keyframes pulse{
-    0%{box-shadow:0 0 0 0 rgba(193,98,45,0.45);}
-    70%{box-shadow:0 0 0 16px rgba(193,98,45,0);}
-    100%{box-shadow:0 0 0 0 rgba(193,98,45,0);}
+    position:relative;
+    padding:24px;
   }
 
-  .luna-overlay{
-    position:fixed; inset:0; background:rgba(27,24,18,0.55);
-    z-index:60; display:none; align-items:flex-end; justify-content:center;
+  #stage::before{
+    content:"";
+    position:fixed;inset:0;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(255,255,255,0.04), transparent 40%),
+      radial-gradient(circle at 80% 80%, rgba(255,255,255,0.03), transparent 40%);
+    pointer-events:none;
   }
-  .luna-overlay.open{display:flex;}
-  .luna-sheet{
-    width:100%; max-width:480px;
-    background:#FAF7EE;
-    border-radius:18px 18px 0 0;
-    padding:22px 20px 28px 20px;
-    box-shadow:0 -8px 30px rgba(0,0,0,0.3);
-    animation:slideup .25s ease;
+
+  .hint{
+    position:absolute;
+    bottom:8%;
+    left:50%;
+    transform:translateX(-50%);
+    color:#888;
+    font-size:13px;
+    letter-spacing:3px;
+    text-transform:uppercase;
+    opacity:.8;
+    animation:pulse 2s ease-in-out infinite;
   }
-  @keyframes slideup{from{transform:translateY(30px); opacity:0;} to{transform:translateY(0); opacity:1;}}
-  .luna-sheet h3{
-    font-family:'Fraunces',serif; margin:0 0 4px 0; color:var(--ink); font-size:1.25rem;
-    display:flex; align-items:center; gap:8px;
+  @keyframes pulse{0%,100%{opacity:.4}50%{opacity:.9}}
+
+  .envelope-wrap{
+    width:min(86vw,360px);
+    aspect-ratio:3/2;
+    position:relative;
+    cursor:pointer;
+    perspective:1400px;
   }
-  .luna-sheet .hint{font-size:0.8rem; color:#8a8170; margin:0 0 16px 0;}
-  .luna-status{
-    min-height:46px;
-    background:#fff;
-    border:1px solid var(--paper-line);
-    border-radius:10px;
-    padding:12px 14px;
-    font-size:0.92rem;
-    margin-bottom:14px;
-    color:var(--charcoal);
+
+  .envelope-base{
+    position:absolute;inset:0;
+    background:linear-gradient(135deg,#fafafa,#e2e0da);
+    border:1px solid #cfcdc5;
+    box-shadow:0 30px 60px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.02) inset;
+    overflow:hidden;
   }
-  .luna-status.confirm{background:#eef3e9; border-color:#9fbf8a; color:#2c4a22;}
-  .luna-row{display:flex; gap:8px;}
-  .luna-mic{
-    width:48px; height:48px; border-radius:50%; border:none;
-    background:var(--ink); color:#fff; font-size:1.2rem; cursor:pointer; flex-shrink:0;
+
+  /* envelope side triangles to give pocket illusion */
+  .envelope-base::before,
+  .envelope-base::after{
+    content:"";
+    position:absolute;
+    width:0;height:0;
+    border-style:solid;
   }
-  .luna-mic.listening{background:var(--rust); animation:pulse 1.1s infinite;}
-  .luna-input{flex:1;}
-  .luna-send{background:var(--rust); border:none; color:#fff; border-radius:8px; padding:0 16px; font-weight:600; cursor:pointer;}
-  .luna-examples{margin-top:14px; font-size:0.76rem; color:#9a9080; line-height:1.5;}
-  .luna-close{
-    position:absolute; top:14px; right:18px; background:none; border:none; font-size:1.3rem; color:#9a9080; cursor:pointer;
+  .envelope-base::before{
+    bottom:0;left:0;
+    border-width:0 0 50% 50%;
+    border-color:transparent transparent #e8e6e0 transparent;
   }
-  .luna-sheet{position:relative;}
+  .envelope-base::after{
+    bottom:0;right:0;
+    border-width:0 50% 50% 0;
+    border-color:transparent transparent #e8e6e0 transparent;
+  }
+
+  .stamp{
+    position:absolute;
+    top:14px;right:14px;
+    width:46px;height:56px;
+    border:2px dashed #b9b6ac;
+    display:flex;align-items:center;justify-content:center;
+    color:#9a978d;
+    font-family:'Anton',sans-serif;
+    font-size:20px;
+    letter-spacing:1px;
+    background:rgba(255,255,255,.4);
+  }
+
+  .to-line{
+    position:absolute;
+    bottom:22%;
+    left:12%;
+    font-family:'Caveat',cursive;
+    font-size:22px;
+    color:#3a3a3a;
+  }
+  .to-line span{
+    display:block;
+    font-family:'Oswald',sans-serif;
+    font-size:10px;
+    letter-spacing:2px;
+    color:#9a978d;
+    text-transform:uppercase;
+    margin-bottom:2px;
+  }
+
+  /* card peeking out, behind flap */
+  .card-peek{
+    position:absolute;
+    left:6%;right:6%;
+    top:8%;
+    height:84%;
+    background:#0e0e0e;
+    border-radius:2px;
+    z-index:2;
+    transform:translateY(0%);
+    transition:transform 1.1s cubic-bezier(.18,.89,.32,1.16) .55s;
+    box-shadow:0 10px 30px rgba(0,0,0,.5);
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    overflow:hidden;
+  }
+  .card-peek .num{
+    margin-top:10%;
+    font-family:'Anton',sans-serif;
+    color:#fff;
+    font-size:15vw;
+    max-font-size:64px;
+    line-height:1;
+    -webkit-text-stroke:1px #fff;
+  }
+
+  /* flap (triangle) that opens */
+  .flap{
+    position:absolute;
+    top:0;left:0;right:0;
+    height:52%;
+    background:linear-gradient(135deg,#f4f3ef,#dedcd5);
+    clip-path:polygon(0 0,100% 0,50% 100%);
+    transform-origin:top center;
+    transition:transform 1s cubic-bezier(.65,0,.35,1);
+    z-index:4;
+    box-shadow:0 2px 6px rgba(0,0,0,.15);
+  }
+
+  .seal{
+    position:absolute;
+    top:42%;left:50%;
+    width:56px;height:56px;
+    background:radial-gradient(circle at 35% 30%, #2c2c2c, var(--wax) 70%);
+    border-radius:50%;
+    transform:translate(-50%,-50%);
+    z-index:5;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 4px 10px rgba(0,0,0,.5);
+    transition:opacity .4s ease, transform .4s ease;
+  }
+  .seal svg{width:28px;height:28px;fill:#cfae6e;}
+
+  .envelope-wrap.open .flap{
+    transform:rotateX(180deg);
+  }
+  .envelope-wrap.open .seal{
+    opacity:0;
+    transform:translate(-50%,-50%) scale(.4);
+  }
+  .envelope-wrap.open .card-peek{
+    transform:translateY(-145%);
+    transition:transform 1.1s cubic-bezier(.22,.8,.3,1.2) .35s;
+  }
+
+  /* ---------- INVITATION ---------- */
+  #invitation{
+    position:fixed;
+    inset:0;
+    background:#f1f0ec;
+    opacity:0;
+    visibility:hidden;
+    overflow-y:auto;
+    transition:opacity .9s ease;
+    z-index:10;
+  }
+  #invitation.show{
+    opacity:1;
+    visibility:visible;
+  }
+
+  .card{
+    max-width:480px;
+    margin:0 auto;
+    min-height:100vh;
+    padding:48px 32px 70px;
+    position:relative;
+    text-align:center;
+    background:
+      radial-gradient(ellipse at top, rgba(0,0,0,.025), transparent 60%);
+  }
+
+  .texture-dot{
+    position:absolute;
+    border-radius:50%;
+    background:#1a1a1a;
+    opacity:.7;
+  }
+
+  .crown{
+    width:64px;
+    margin:4px auto 18px;
+    display:block;
+  }
+
+  .eyebrow{
+    font-size:13px;
+    letter-spacing:6px;
+    font-weight:500;
+    color:#1a1a1a;
+    text-transform:uppercase;
+  }
+
+  .quince{
+    font-family:'Anton',sans-serif;
+    font-size:clamp(120px,38vw,210px);
+    line-height:.8;
+    color:#0e0e0e;
+    margin:18px 0 6px;
+    letter-spacing:-2px;
+    position:relative;
+    -webkit-text-stroke: 0px;
+  }
+  .quince::after{
+    content:"";
+    position:absolute;
+    left:50%;
+    bottom:-6px;
+    transform:translateX(-50%) rotate(-1.5deg);
+    width:78%;
+    height:14px;
+    background:#0e0e0e;
+    opacity:.95;
+  }
+
+  .ribbon{
+    display:inline-block;
+    background:#0e0e0e;
+    color:#f5f4f1;
+    padding:10px 22px;
+    margin-top:26px;
+    font-family:'Caveat',cursive;
+    font-weight:700;
+    font-size:26px;
+    letter-spacing:1px;
+    transform:rotate(-1deg);
+  }
+
+  .details{
+    margin-top:42px;
+    text-align:left;
+    display:inline-flex;
+    flex-direction:column;
+    gap:18px;
+  }
+  .detail-row{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    font-size:16px;
+    font-weight:500;
+    letter-spacing:.5px;
+    color:#161616;
+  }
+  .detail-row svg{width:20px;height:20px;flex-shrink:0;}
+
+  .divider{
+    width:60%;
+    height:1px;
+    background:#1a1a1a;
+    opacity:.25;
+    margin:34px auto;
+  }
+
+  .no-faltes{
+    font-family:'Caveat',cursive;
+    font-weight:700;
+    font-size:38px;
+    color:#0e0e0e;
+  }
+
+  .dresscode{
+    margin-top:40px;
+    background:#0e0e0e;
+    color:#f5f4f1;
+    padding:26px 18px 30px;
+    position:relative;
+    transform:rotate(.4deg);
+  }
+  .dresscode .label{
+    font-size:13px;
+    letter-spacing:4px;
+    font-weight:500;
+    text-transform:uppercase;
+    color:#cfcdc5;
+  }
+  .dresscode .blanca{
+    font-family:'Caveat',cursive;
+    font-weight:700;
+    font-size:58px;
+    margin:4px 0;
+    color:#fff;
+  }
+  .dresscode .sub{
+    font-size:12px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:#cfcdc5;
+  }
+
+  .footer-note{
+    margin-top:46px;
+    font-size:11px;
+    letter-spacing:2px;
+    color:#8a8a8a;
+    text-transform:uppercase;
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    .flap,.card-peek,.seal,#invitation{transition:none!important;}
+  }
 </style>
 </head>
 <body>
 
-<header>
-  <h1>Bitácora</h1>
-  <p>tu cuaderno de cada día, con Luna 🌙</p>
-</header>
-
-<div class="tabs">
-  <button class="tab active" data-tab="gastos">Gastos</button>
-  <button class="tab" data-tab="tareas">Tareas &amp; hábitos</button>
-  <button class="tab" data-tab="estudio">Estudio / trabajo</button>
+<div id="stage">
+  <div class="envelope-wrap" id="envelope">
+    <div class="card-peek"><div class="num">15</div></div>
+    <div class="envelope-base">
+      <div class="stamp">XV</div>
+      <div class="to-line"><span>Para</span>Vos ♥</div>
+    </div>
+    <div class="flap"></div>
+    <div class="seal">
+      <svg viewBox="0 0 24 24"><path d="M12 2L9 8l-6 1 4.5 4.4L6.4 20 12 17l5.6 3-1.1-6.6L21 9l-6-1z"/></svg>
+    </div>
+  </div>
+  <div class="hint">Toca el sobre para abrirlo</div>
 </div>
 
-<main>
+<div id="invitation">
+  <div class="card">
+    <svg class="crown" viewBox="0 0 100 60" fill="none" stroke="#111" stroke-width="4" stroke-linejoin="round">
+      <path d="M10 50 L15 20 L32 38 L50 12 L68 38 L85 20 L90 50 Z"/>
+    </svg>
 
-  <!-- GASTOS -->
-  <section class="panel active" id="panel-gastos">
-    <h2 class="section-title"><span class="dot gastos"></span>Gastos del mes</h2>
-    <div class="summary">
-      <div>
-        <div class="label">Total gastado</div>
-        <div class="num" id="gastos-total">$0</div>
+    <div class="eyebrow">Estás invitado a</div>
+
+    <div class="quince">15</div>
+
+    <div class="ribbon">Una noche para recordar</div>
+
+    <div class="details">
+      <div class="detail-row">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+        28 / 07
       </div>
-      <div>
-        <div class="label" style="text-align:right">Movimientos</div>
-        <div class="num" id="gastos-count" style="text-align:right">0</div>
+      <div class="detail-row">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M12 21s7-7.5 7-12a7 7 0 1 0-14 0c0 4.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.3"/></svg>
+        Conde del Maule 4470
+      </div>
+      <div class="detail-row">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+        A partir de las 21:00 hs
       </div>
     </div>
-    <div class="row">
-      <input type="text" id="gasto-desc" placeholder="¿En qué gastaste?">
-      <input type="number" id="gasto-monto" placeholder="Monto" min="0">
-    </div>
-    <div class="row">
-      <select id="gasto-cat" style="flex:1">
-        <option value="Comida">Comida</option>
-        <option value="Transporte">Transporte</option>
-        <option value="Hogar">Hogar</option>
-        <option value="Ocio">Ocio</option>
-        <option value="Salud">Salud</option>
-        <option value="Otro">Otro</option>
-      </select>
-      <button class="add" onclick="addGasto()">Agregar</button>
-    </div>
-    <ul class="list" id="gastos-list"></ul>
-  </section>
 
-  <!-- TAREAS -->
-  <section class="panel" id="panel-tareas">
-    <h2 class="section-title"><span class="dot tareas"></span>Hábitos de hoy</h2>
-    <div class="habits" id="habits-list"></div>
-    <div class="row">
-      <input type="text" id="habit-input" placeholder="Nuevo hábito (ej: Tomar agua)">
-      <button class="add" onclick="addHabit()" style="background:var(--ink)">Agregar</button>
+    <div class="divider"></div>
+    <div class="no-faltes">¡No faltes!</div>
+
+    <div class="dresscode">
+      <div class="label">Vestimenta</div>
+      <div class="blanca">Blanca</div>
+      <div class="sub">Para todos los invitados</div>
     </div>
 
-    <h2 class="section-title" style="margin-top:26px"><span class="dot tareas"></span>Tareas pendientes</h2>
-    <div class="row">
-      <input type="text" id="tarea-input" placeholder="¿Qué necesitas hacer?">
-      <button class="add" onclick="addTarea()" style="background:var(--ink)">Agregar</button>
-    </div>
-    <ul class="list" id="tareas-list"></ul>
-  </section>
-
-  <!-- ESTUDIO -->
-  <section class="panel" id="panel-estudio">
-    <h2 class="section-title"><span class="dot estudio"></span>Estudio / trabajo</h2>
-    <div class="row">
-      <input type="text" id="estudio-input" placeholder="Proyecto, lectura, entrega...">
-      <input type="text" id="estudio-fecha" placeholder="Fecha límite (opcional)" style="max-width:160px">
-    </div>
-    <div class="row">
-      <button class="add" onclick="addEstudio()">Agregar</button>
-    </div>
-    <ul class="list" id="estudio-list"></ul>
-  </section>
-
-</main>
-
-<footer>tus datos se guardan automáticamente en este dispositivo</footer>
-
-<button class="luna-fab" id="luna-fab" onclick="openLuna()">🎙️</button>
-
-<div class="luna-overlay" id="luna-overlay">
-  <div class="luna-sheet">
-    <button class="luna-close" onclick="closeLuna()">×</button>
-    <h3>🌙 Luna</h3>
-    <p class="hint">Dime qué agregar, por ejemplo: <em>"agrega gasto de 20 mil en comida hoy"</em></p>
-    <div class="luna-status" id="luna-status">Toca el micrófono o escribe abajo.</div>
-    <div class="luna-row">
-      <button class="luna-mic" id="luna-mic" onclick="toggleListen()">🎙️</button>
-      <input type="text" class="luna-input" id="luna-input" placeholder="Escríbele a Luna...">
-      <button class="luna-send" onclick="handleLunaText()">Enviar</button>
-    </div>
-    <div class="luna-examples">
-      Ejemplos: "agrega gasto de 15000 en transporte" · "agrega tarea llamar al banco" ·
-      "agrega hábito tomar agua" · "agrega estudio entregar informe para el viernes"
-    </div>
+    <div class="footer-note">Con cariño, te espero ahí</div>
   </div>
 </div>
 
 <script>
-let state = { gastos: [], tareas: [], habitos: [], estudio: [] };
-let ready = false;
+  const envelope = document.getElementById('envelope');
+  const invitation = document.getElementById('invitation');
+  const stage = document.getElementById('stage');
 
-async function load(){
-  try{
-    const r = await window.storage.get('bitacora-state', false);
-    if(r && r.value) state = JSON.parse(r.value);
-  }catch(e){ /* no previous data */ }
-  ready = true;
-  renderAll();
-}
-
-async function save(){
-  if(!ready) return;
-  try{
-    await window.storage.set('bitacora-state', JSON.stringify(state), false);
-  }catch(e){ console.error('No se pudo guardar', e); }
-}
-
-// TABS
-document.querySelectorAll('.tab').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
-    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
-  });
-});
-
-function fmt(n){
-  return '$' + Number(n).toLocaleString('es-CO');
-}
-function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
-
-// GASTOS
-function addGasto(){
-  const desc = document.getElementById('gasto-desc').value.trim();
-  const monto = parseFloat(document.getElementById('gasto-monto').value);
-  const cat = document.getElementById('gasto-cat').value;
-  if(!desc || !monto || monto<=0) return;
-  state.gastos.unshift({id:uid(), desc, monto, cat, date:new Date().toISOString()});
-  document.getElementById('gasto-desc').value='';
-  document.getElementById('gasto-monto').value='';
-  save(); renderGastos();
-}
-function delGasto(id){
-  state.gastos = state.gastos.filter(g=>g.id!==id);
-  save(); renderGastos();
-}
-function renderGastos(){
-  const total = state.gastos.reduce((s,g)=>s+Number(g.monto),0);
-  document.getElementById('gastos-total').textContent = fmt(total);
-  document.getElementById('gastos-count').textContent = state.gastos.length;
-  const list = document.getElementById('gastos-list');
-  if(state.gastos.length===0){
-    list.innerHTML = '<div class="empty">Aún no registras gastos. ¡Agrega el primero!</div>';
-    return;
+  function openInvite(){
+    envelope.classList.add('open');
+    setTimeout(()=>{
+      invitation.classList.add('show');
+      document.body.style.overflow = 'auto';
+    }, 1400);
+    envelope.style.pointerEvents = 'none';
   }
-  list.innerHTML = state.gastos.map(g=>`
-    <li>
-      <span class="cat-pill">${g.cat}</span>
-      <span class="item-text">${g.desc}</span>
-      <span class="item-meta">${fmt(g.monto)}</span>
-      <button class="del" onclick="delGasto('${g.id}')">×</button>
-    </li>`).join('');
-}
 
-// HABITOS
-function addHabit(){
-  const input = document.getElementById('habit-input');
-  const name = input.value.trim();
-  if(!name) return;
-  state.habitos.push({id:uid(), name, checked:false});
-  input.value='';
-  save(); renderHabits();
-}
-function toggleHabit(id){
-  const h = state.habitos.find(x=>x.id===id);
-  if(h) h.checked = !h.checked;
-  save(); renderHabits();
-}
-function delHabit(id){
-  state.habitos = state.habitos.filter(h=>h.id!==id);
-  save(); renderHabits();
-}
-function renderHabits(){
-  const wrap = document.getElementById('habits-list');
-  if(state.habitos.length===0){
-    wrap.innerHTML = '<div class="empty" style="width:100%">Agrega un hábito que quieras seguir cada día.</div>';
-    return;
-  }
-  wrap.innerHTML = state.habitos.map(h=>`
-    <div class="habit-chip ${h.checked?'checked':''}" onclick="toggleHabit('${h.id}')">
-      ${h.name}<span class="x" onclick="event.stopPropagation(); delHabit('${h.id}')">×</span>
-    </div>`).join('');
-}
+  envelope.addEventListener('click', openInvite);
+</script>
 
-// TAREAS
-function addTarea(){
-  const input = document.getElementById('tarea-input');
-  const text = input.value.trim();
-  if(!text) return;
-  state.tareas.unshift({id:uid(), text, done:false});
-  input.value='';
-  save(); renderTareas();
-}
-function toggleTarea(id){
-  const t = state.tareas.find(x=>x.id===id);
-  if(t) t.done = !t.done;
-  save(); renderTareas();
-}
-function delTarea(id){
-  state.tareas = state.tareas.filter(t=>t.id!==id);
-  save(); renderTareas();
-}
-function renderTareas(){
-  const list = document.getElementById('tareas-list');
-  if(state.tareas.length===0){
-    list.innerHTML = '<div class="empty">No tienes tareas pendientes. Buen trabajo.</div>';
-    return;
-  }
-  list.innerHTML = state.tareas.map(t=>`
-    <li>
-      <span class="check ${t.done?'checked':''}" onclick="toggleTarea('${t.id}')">${t.done?'✓':''}</span>
-      <span class="item-text ${t.done?'done':''}">${t.text}</span>
-      <button class="del" onclick="delTarea('${t.id}')">×</button>
-    </li>`).join('');
-}
-
-// ESTUDIO
-function addEstudio(){
-  const input = document.getElementById('estudio-input');
-  const fecha = document.getElementById('estudio-fecha');
-  const text = input.value.trim();
-  if(!text) return;
-  state.estudio.unshift({id:uid(), text, fecha: fecha.value.trim(), done:false});
-  input.value=''; fecha.value='';
-  save(); renderEstudio();
-}
-function toggleEstudio(id){
-  const e = state.estudio.find(x=>x.id===id);
-  if(e) e.done = !e.done;
-  save(); renderEstudio();
-}
-function delEstudio(id){
-  state.estudio = state.estudio.filter(e=>e.id!==id);
-  save(); renderEstudio();
-}
-function renderEstudio(){
-  const list = document.getElementById('estudio-list');
-  if(state.estudio.length===0){
-    list.innerHTML = '<div class="empty">Sin pendientes de estudio o trabajo por ahora.</div>';
-    return;
-  }
-  list.innerHTML = state.estudio.map(e=>`
-    <li>
-      <span class="check ${e.done?'checked':''}" onclick="toggleEstudio('${e.id}')">${e.done?'✓':''}</span>
-      <span class="item-text ${e.done?'done':''}">${e.text}</span>
-      ${e.fecha?`<span class="item-meta">${e.fecha}</span>`:''}
-      <button class="del" onclick="delEstudio('${e.id}')">×</button>
-    </li>`).join('');
-}
-
-function renderAll(){
-  renderGastos(); renderHabits(); renderTareas(); renderEstudio();
-}
-
-load();
-
-/* ============ LUNA: asistente de voz ============ */
-const CATS = {
-  Comida: ['comida','comer','almuerzo','desayuno','cena','restaurante','mercado','super','supermercado','domicilio'],
-  Transporte: ['transporte','uber','taxi','bus','gasolina','parqueadero','metro','pasaje','didi'],
-  Hogar: ['arriendo','hogar','casa','servicios','luz','agua','internet','aseo'],
-  Ocio: ['cine','salida','fiesta','ocio','bar','rumba','juego','streaming','netflix'],
-  Salud: ['salud','médico','medico','farmacia','medicina','droguería','drogueria','consulta']
-};
-
-function openLuna(){
-  document.getElementById('luna-overlay').classList.add('open');
-  setLunaStatus('Toca el micrófono o escribe abajo.', false);
-}
-function closeLuna(){
-  document.getElementById('luna-overlay').classList.remove('open');
-  stopListen();
-}
-function setLunaStatus(msg, confirm){
-  const el = document.getElementById('luna-status');
-  el.textContent = msg;
-  el.classList.toggle('confirm', !!confirm);
-}
-
-let recognition = null;
-let listening = false;
-
-function getRecognition(){
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if(!SR) return null;
-  const r = new SR();
-  r.lang = 'es-CO';
-  r.interimResults = false;
-  r.maxAlternatives = 1;
-  return r;
-}
-
-function toggleListen(){
-  if(listening){ stopListen(); return; }
-  recognition = getRecognition();
-  if(!recognition){
-    setLunaStatus('Tu navegador no soporta micrófono aquí. Escríbele a Luna abajo. 👇', false);
-    return;
-  }
-  listening = true;
-  document.getElementById('luna-mic').classList.add('listening');
-  document.getElementById('luna-fab').classList.add('listening');
-  setLunaStatus('Escuchando... habla ahora.', false);
-
-  recognition.onresult = (e)=>{
-    const text = e.results[0][0].transcript;
-    document.getElementById('luna-input').value = text;
-    processLunaCommand(text);
-  };
-  recognition.onerror = ()=>{
-    setLunaStatus('No te escuché bien. Intenta de nuevo o escribe.', false);
-  };
-  recognition.onend = ()=>{ stopListen(); };
-  recognition.start();
-}
-function stopListen(){
-  listening = false;
-  document.getElementById('luna-mic').classList.remove('listening');
-  document.getElementById('luna-fab').classList.remove('listening');
-  if(recognition){ try{ recognition.stop(); }catch(e){} }
-}
-function handleLunaText(){
-  const input = document.getElementById('luna-input');
-  const text = input.value.trim();
-  if(!text) return;
-  processLunaCommand(text);
-}
-
-function parseAmount(text){
-  // ej: "20 mil", "20mil", "20k",
+</body>
+        </html>
+        
